@@ -202,9 +202,9 @@ void loop() {
       if (lecturaBoton1 == 0 && estadoBoton1 == 0) {
         estadoBoton1 = 1;
       }
-      if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO RAPIDO NEGRO
-        veloci = 230;  //VELOCIDAD RECTA
-        veloci2 = 245; //VELOCIDAD CURVA
+      if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO RAPIDO - NEGRO
+        veloci = 230; //VELOCIDAD RECTA
+        veloci2 = 245;//VELOCIDAD CURVA
         pRecta = 0.3; //
         dRecta = 3.6;//
         pCurva = 0.3;//
@@ -214,9 +214,9 @@ void loop() {
       if (lecturaBoton2 == 0 && estadoBoton2 == 0) {
         estadoBoton2 = 1;
       }
-      if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO LENTO BLANCA
-        veloci = 180;   //VELOCIDAD RECTA
-        veloci2 = 210;  //VELOCIDAD CURVA
+      if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO LENTO - BLANCO
+        veloci = 150; //VELOCIDAD RECTA
+        veloci2 = 150;  //VELOCIDAD CURVA
         pRecta = 0.3; //
         dRecta = 3.6;//
         pCurva = 0.3;//
@@ -320,10 +320,9 @@ void loop() {
           //Serial.println("If 2");
         }
       }
-
+      
       break;
   }
-
 }
 
 void seguirLinea(int pin1, int pin2, float _error) {
@@ -351,7 +350,6 @@ void seguirLinea(int pin1, int pin2, float _error) {
   //Serial.println(cambio);
   analogWrite(pin1, abs(cambio));
   analogWrite(pin2, velocidadMax);
-
 }
 
 
@@ -368,14 +366,11 @@ void Max_Min() {
   for (i = 0; i < cant_sens; i++) {
 
     if (medicionSP[i] > max_lectura[i]) {
-
       max_lectura[i] = medicionSP[i];
     }
 
     if (medicionSP[i] < min_lectura[i]) {
-
       min_lectura[i] = medicionSP[i];
-
     }
   }
 }
@@ -394,9 +389,7 @@ int mapeado(int minimo, int maximo, int medicion) {
   mapeado_final = map(medicion, minimo, maximo, 0, 1000);
 
   return mapeado_final;
-
 }
-
 
 void inversion() {
   sumador = 0;
@@ -413,7 +406,6 @@ int sacaLineas() {
   for (i = 0; i < cant_sens; i++) {
     dividendo += sens_map[i] * (i + 1);
     suma += sens_map[i];
-
   }
   if (suma > 0) {
     linea = (dividendo * 1000) / suma;
