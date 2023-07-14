@@ -1,6 +1,7 @@
 const int Trigger = 4; //Pin digital
 const int Echo = 3; //Pin digital
-
+//GND
+//VIN
 
 void setup() {
   Serial.begin(115200);
