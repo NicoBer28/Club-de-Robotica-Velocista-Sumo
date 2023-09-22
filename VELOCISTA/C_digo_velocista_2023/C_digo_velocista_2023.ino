@@ -1,4 +1,4 @@
-//AUTOR: NICOLAS BERGERMAN
+//NTEGRANTES: NICOLAS BERGERMAN, FRANCISCO MOMBELLI, SANTIAGO RAPETTI, FLORENCIA GRILLO, SANTIAGO EULMESEKIAN
 //Código Velocista Dashito
 
 
@@ -203,8 +203,8 @@ void loop() {
         estadoBoton1 = 1;
       }
       if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO RAPIDO - NEGRO
-        veloci = 230; //VELOCIDAD RECTA
-        veloci2 = 245;//VELOCIDAD CURVA
+        veloci = 240; //VELOCIDAD RECTA
+        veloci2 = 255;//VELOCIDAD CURVA
         pRecta = 0.3; //
         dRecta = 3.6;//
         pCurva = 0.3;//
@@ -215,8 +215,8 @@ void loop() {
         estadoBoton2 = 1;
       }
       if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO LENTO - BLANCO
-        veloci = 150; //VELOCIDAD RECTA
-        veloci2 = 150;  //VELOCIDAD CURVA
+        veloci = 180; //VELOCIDAD RECTA
+        veloci2 = 180;  //VELOCIDAD CURVA
         pRecta = 0.3; //
         dRecta = 3.6;//
         pCurva = 0.3;//
@@ -252,7 +252,7 @@ void loop() {
 
       //POSICION DEL ROBOT RESPECTO A LA LINEA, DE -1000 A 1000
       proporcional = sacaLineas();
-      // Serial.println(proporcional);
+      Serial.println(proporcional);
       //------
       //PID
       integral = integral + proporcional;
@@ -264,7 +264,7 @@ void loop() {
       derivada = proporcional - p_anterior;
       p_anterior = proporcional;
       //------
-      
+
       //-----------
       //SI SE VA DE LA PISTA, PARA DONDE GIRA
       if (seFue == 1) {
@@ -272,22 +272,38 @@ void loop() {
 
         if (ultValor == 0) {
           Serial.println("izq");
-          analogWrite(MOTI_PWM, 0);
-          analogWrite(MOTD_PWM, 255);
+          digitalWrite(MOTD_AD, HIGH);
+          digitalWrite(MOTI_AD, LOW);
+          digitalWrite(MOTD_AT, LOW);
+          digitalWrite(MOTI_AT, HIGH);
+          analogWrite(MOTI_PWM, 255);
+          analogWrite(MOTD_PWM, 255);//255
         }
         if (ultValor == 1) {
           Serial.println("der");
-          analogWrite(MOTD_PWM, 0);
-          analogWrite(MOTI_PWM, 255);
+          digitalWrite(MOTD_AD, LOW);
+          digitalWrite(MOTI_AD, HIGH);
+          digitalWrite(MOTD_AT, HIGH);
+          digitalWrite(MOTI_AT, LOW);
+          analogWrite(MOTD_PWM, 255);
+          analogWrite(MOTI_PWM, 255);//255
         }
       } else if (proporcional < 0) {
         ultValor = 1;
+        digitalWrite(MOTD_AD, HIGH);
+        digitalWrite(MOTI_AD, HIGH);
+        digitalWrite(MOTD_AT, LOW);
+        digitalWrite(MOTI_AT, LOW);
       } else {
         ultValor = 0;
+        digitalWrite(MOTD_AD, HIGH);
+        digitalWrite(MOTI_AD, HIGH);
+        digitalWrite(MOTD_AT, LOW);
+        digitalWrite(MOTI_AT, LOW);
       }
       //-----------
 
-      if (proporcional > -50 && proporcional < 50) {
+      if (proporcional > -150 && proporcional < 150) {
         kProporcional = pRecta;
         kDerivada = dRecta;
         velocidadMax = veloci;
@@ -320,7 +336,7 @@ void loop() {
           //Serial.println("If 2");
         }
       }
-      
+
       break;
   }
 }
@@ -431,7 +447,11 @@ int franBot() {
   int afuera;
 
   for (int l = 0; l < cant_sens; l++) {
-    if (sens_map[l] < 100) {
+    /*    Serial.print(l);
+        Serial.print(": ");
+        Serial.println(sens_map[l]);
+    */
+    if (sens_map[l] < 200) {
       sumador += 1;
     }
   }
