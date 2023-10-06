@@ -204,24 +204,24 @@ void loop() {
         estadoBoton1 = 1;
       }
       if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO RAPIDO - NEGRO
-        veloci = 240; //VELOCIDAD RECTA
-        veloci2 = 255;//VELOCIDAD CURVA
-        pRecta = 0.3; //
-        dRecta = 3.6;//
-        pCurva = 0.3;//
-        dCurva = 3.6;//
+        veloci = 150; //VELOCIDAD RECTA
+        veloci2 = 150;//VELOCIDAD CURVA
+        pRecta = 0.7; //
+        dRecta = 4;//
+        pCurva = 0.7;//
+        dCurva = 4;//
         estado = MODO_3;
       }
       if (lecturaBoton2 == 0 && estadoBoton2 == 0) {
         estadoBoton2 = 1;
       }
       if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO LENTO - BLANCO
-        veloci = 180; //VELOCIDAD RECTA
-        veloci2 = 180;  //VELOCIDAD CURVA
-        pRecta = 0.3; //
-        dRecta = 3.6;//
-        pCurva = 0.3;//
-        dCurva = 3.6;//
+        veloci = 150; //VELOCIDAD RECTA
+        veloci2 = 150;  //VELOCIDAD CURVA
+        pRecta = 0.7; //
+        dRecta = 4;//
+        pCurva = 0.7;//
+        dCurva = 4;//
         estado = MODO_3;
       }
       break;
@@ -249,7 +249,7 @@ void loop() {
       inversion();
 
       //SI SE VA DE LA PISTA, LA FUNCION DEVUELVE 1, SINO DEVUELVE 0
-      seFue = franBot();
+      //seFue = franBot();
 
       //POSICION DEL ROBOT RESPECTO A LA LINEA, DE -1000 A 1000
       proporcional = sacaLineas();
