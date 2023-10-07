@@ -203,25 +203,25 @@ void loop() {
       if (lecturaBoton1 == 0 && estadoBoton1 == 0) {
         estadoBoton1 = 1;
       }
-      if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO RAPIDO - NEGRO
-        veloci = 150; //VELOCIDAD RECTA
-        veloci2 = 150;//VELOCIDAD CURVA
-        pRecta = 0.7; //
-        dRecta = 4;//
-        pCurva = 0.7;//
-        dCurva = 4;//
+      if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO LENTO - CERCA DEL LED
+        veloci = 210; //VELOCIDAD RECTA  210
+        veloci2 = 155;//VELOCIDAD CURVA  145-155
+        pRecta = 0.15; //  0.15
+        dRecta = 2.7;//  2.7
+        pCurva = 0.4;//  0.4
+        dCurva = 3.5;//  3.5
         estado = MODO_3;
       }
       if (lecturaBoton2 == 0 && estadoBoton2 == 0) {
         estadoBoton2 = 1;
       }
-      if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO LENTO - BLANCO
-        veloci = 150; //VELOCIDAD RECTA
-        veloci2 = 150;  //VELOCIDAD CURVA
-        pRecta = 0.7; //
-        dRecta = 4;//
-        pCurva = 0.7;//
-        dCurva = 4;//
+      if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO RAPIDO - LEJOS DEL LED
+        veloci = 240; //VELOCIDAD RECTA 225-240
+        veloci2 = 165;  //VELOCIDAD CURVA 165
+        pRecta = 0.3; // 0.2
+        dRecta = 2;// 2
+        pCurva = 0.45;//  0.38
+        dCurva = 3.3;// 3.3
         estado = MODO_3;
       }
       break;
@@ -249,7 +249,7 @@ void loop() {
       inversion();
 
       //SI SE VA DE LA PISTA, LA FUNCION DEVUELVE 1, SINO DEVUELVE 0
-      //seFue = franBot();
+      seFue = franBot();
 
       //POSICION DEL ROBOT RESPECTO A LA LINEA, DE -1000 A 1000
       proporcional = sacaLineas();
@@ -269,25 +269,25 @@ void loop() {
       //-----------
       //SI SE VA DE LA PISTA, PARA DONDE GIRA
       if (seFue == 1) {
-        Serial.println("aribot");
+        //Serial.println("aribot");
 
         if (ultValor == 0) {
-          Serial.println("izq");
+          //Serial.println("izq");
           digitalWrite(MOTD_AD, HIGH);
           digitalWrite(MOTI_AD, LOW);
           digitalWrite(MOTD_AT, LOW);
           digitalWrite(MOTI_AT, HIGH);
-          analogWrite(MOTI_PWM, 255);
-          analogWrite(MOTD_PWM, 255);//255
+          analogWrite(MOTI_PWM, 100);// 180
+          analogWrite(MOTD_PWM, 200);//255  // 180
         }
         if (ultValor == 1) {
-          Serial.println("der");
+          //Serial.println("der");
           digitalWrite(MOTD_AD, LOW);
           digitalWrite(MOTI_AD, HIGH);
           digitalWrite(MOTD_AT, HIGH);
           digitalWrite(MOTI_AT, LOW);
-          analogWrite(MOTD_PWM, 255);
-          analogWrite(MOTI_PWM, 255);//255
+          analogWrite(MOTD_PWM, 100); // 180
+          analogWrite(MOTI_PWM, 200);//255  // 180
         }
       } else if (proporcional < 0) {
         ultValor = 1;
@@ -304,7 +304,7 @@ void loop() {
       }
       //-----------
 
-      if (proporcional > -150 && proporcional < 150) {
+      if (proporcional > -200 && proporcional < 200) {
         kProporcional = pRecta;
         kDerivada = dRecta;
         velocidadMax = veloci;
@@ -444,7 +444,7 @@ int sacaLineas() {
 
 
 int franBot() {
-  //  int sumador;
+  int sumador = 0;
   int afuera;
 
   for (int l = 0; l < cant_sens; l++) {
@@ -458,7 +458,7 @@ int franBot() {
   }
   //Serial.println(sumador);
 
-  if (sumador == 7) {
+  if (sumador >= 6) {
     afuera = 1;
     sumador = 0;
   } else {
