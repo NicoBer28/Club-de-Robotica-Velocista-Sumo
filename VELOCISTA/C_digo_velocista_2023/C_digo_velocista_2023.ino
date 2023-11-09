@@ -204,24 +204,24 @@ void loop() {
         estadoBoton1 = 1;
       }
       if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO LENTO - CERCA DEL LED
-        veloci = 210; //VELOCIDAD RECTA  210
-        veloci2 = 155;//VELOCIDAD CURVA  145-155
-        pRecta = 0.15; //  0.15
-        dRecta = 2.7;//  2.7
-        pCurva = 0.4;//  0.4
-        dCurva = 3.5;//  3.5
+        veloci = 138; //VELOCIDAD RECTA  210
+        veloci2 = 188;//VELOCIDAD CURVA  170  155
+        pRecta = 0.1; //  0.15
+        dRecta = 0.1;//  2.3
+        pCurva = 0.2;//  0.2
+        dCurva = 3;//  3
         estado = MODO_3;
       }
       if (lecturaBoton2 == 0 && estadoBoton2 == 0) {
         estadoBoton2 = 1;
       }
       if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO RAPIDO - LEJOS DEL LED
-        veloci = 240; //VELOCIDAD RECTA 225-240
-        veloci2 = 165;  //VELOCIDAD CURVA 165
-        pRecta = 0.3; // 0.2
-        dRecta = 2;// 2
-        pCurva = 0.45;//  0.38
-        dCurva = 3.3;// 3.3
+        veloci = 200; //VELOCIDAD RECTA 235 180
+        veloci2 = 155;  //VELOCIDAD CURVA 180 235
+        pRecta = 0.1; // 0.2  0.15
+        dRecta = 0.1;// 2  0.5
+        pCurva = 0.2;//  0.38
+        dCurva = 3;// 3.3
         estado = MODO_3;
       }
       break;
@@ -277,8 +277,8 @@ void loop() {
           digitalWrite(MOTI_AD, LOW);
           digitalWrite(MOTD_AT, LOW);
           digitalWrite(MOTI_AT, HIGH);
-          analogWrite(MOTI_PWM, 100);// 180
-          analogWrite(MOTD_PWM, 200);//255  // 180
+          analogWrite(MOTI_PWM, 150);// 100
+          analogWrite(MOTD_PWM, 150);//255  // 200
         }
         if (ultValor == 1) {
           //Serial.println("der");
@@ -286,8 +286,8 @@ void loop() {
           digitalWrite(MOTI_AD, HIGH);
           digitalWrite(MOTD_AT, HIGH);
           digitalWrite(MOTI_AT, LOW);
-          analogWrite(MOTD_PWM, 100); // 180
-          analogWrite(MOTI_PWM, 200);//255  // 180
+          analogWrite(MOTD_PWM, 150); // 100
+          analogWrite(MOTI_PWM, 150);//255  // 200
         }
       } else if (proporcional < 0) {
         ultValor = 1;
@@ -304,7 +304,7 @@ void loop() {
       }
       //-----------
 
-      if (proporcional > -200 && proporcional < 200) {
+      if (proporcional > -170 && proporcional < 170) {
         kProporcional = pRecta;
         kDerivada = dRecta;
         velocidadMax = veloci;
