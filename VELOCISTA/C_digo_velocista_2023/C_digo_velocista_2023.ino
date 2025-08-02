@@ -249,7 +249,7 @@ void loop() {
       inversion();
 
       //SI SE VA DE LA PISTA, LA FUNCION DEVUELVE 1, SINO DEVUELVE 0
-      seFue = franBot();
+      seFue = seFue();
 
       //POSICION DEL ROBOT RESPECTO A LA LINEA, DE -1000 A 1000
       proporcional = sacaLineas();
@@ -443,7 +443,7 @@ int sacaLineas() {
 }
 
 
-int franBot() {
+int seFue() {
   int sumador = 0;
   int afuera;
 
