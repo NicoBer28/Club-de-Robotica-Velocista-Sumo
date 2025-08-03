@@ -34,7 +34,7 @@
 #define PIN_LED1 10
 #define PIN_LED2 2
 //CANTIDAD DE SENSORES
-#define cant_sens 7
+#define CANT_SENS 7
 
 #define BAUD_RATE 9600
 
@@ -60,8 +60,8 @@
 
 
 
-int max_lectura[cant_sens], min_lectura[cant_sens], sens_map[cant_sens];
-int medicionSP[cant_sens];
+int max_lectura[CANT_SENS], min_lectura[CANT_SENS], sens_map[CANT_SENS];
+int medicionSP[CANT_SENS];
 
 int estado = MODO_0;
 
@@ -148,6 +148,7 @@ void loop() {
         digitalWrite(PIN_LED1, LOW);
         digitalWrite(PIN_LED2, HIGH);
       }
+      break;
 
     case MODO_1:
 
@@ -189,7 +190,7 @@ void loop() {
       if (lecturaBoton2 == 1 && empieza == 1) {
 
         /*   PRINT MINIMOS Y MAXIMOS
-             for (int q = 0; q < cant_sens; q++) {
+             for (int q = 0; q < CANT_SENS; q++) {
 
              Serial.println("minimo: ");
              Serial.println(min_lectura[q]);
@@ -383,7 +384,7 @@ int leerCNY(int pin) {
 
 void Max_Min() {
 
-  for (int i = 0; i < cant_sens; i++) {
+  for (int i = 0; i < CANT_SENS; i++) {
 
     if (medicionSP[i] > max_lectura[i]) {
       max_lectura[i] = medicionSP[i];
@@ -412,7 +413,7 @@ int mapeado(int minimo, int maximo, int medicion) {
 }
 
 void inversion() {
-  for (int i = 0; i < cant_sens; i++) {
+  for (int i = 0; i < CANT_SENS; i++) {
     sens_map[i] = 1000 - sens_map[i];
     //Serial.println(sens_map[i]);
   }
@@ -422,7 +423,7 @@ int sacaLineas() {
   long dividendo = 0;
   long suma = 0;
   int linea;
-  for (int i = 0; i < cant_sens; i++) {
+  for (int i = 0; i < CANT_SENS; i++) {
     dividendo += sens_map[i] * (i + 1);
     suma += sens_map[i];
   }
@@ -449,7 +450,7 @@ int seFue() {
   int sumador = 0;
   int afuera;
 
-  for (int l = 0; l < cant_sens; l++) {
+  for (int l = 0; l < CANT_SENS; l++) {
     /*    Serial.print(l);
         Serial.print(": ");
         Serial.println(sens_map[l]);
