@@ -38,11 +38,44 @@
 
 #define BAUD_RATE 9600
 
+                        //****************************************
+                        //            SE CAMBIA ACÁ
+                        //****************************************
+
+//---------------MODO LENTO---------------
+#define VEL_RECTA_LENTO 138
+#define VEL_CURVA_LENTO 188
+#define P_RECTA_LENTO 0.1
+#define D_RECTA_LENTO 0.1
+#define P_CURVA_LENTO 0.2
+#define D_CURVA_LENTO 3.0
+
+//---------------MODO RAPIDO---------------
+#define VEL_RECTA_RAPIDO 200
+#define VEL_CURVA_RAPIDO 155
+#define P_RECTA_RAPIDO 0.1
+#define D_RECTA_RAPIDO 0.1
+#define P_CURVA_RAPIDO 0.2
+#define D_CURVA_RAPIDO 3.0
+
+
 
 int max_lectura[cant_sens], min_lectura[cant_sens], sens_map[cant_sens];
 int medicionSP[cant_sens];
 
 int estado = MODO_0;
+
+struct ConfigModo {
+    int velRecta;
+    int velCurva;
+    float pRecta;
+    float dRecta;
+    float pCurva;
+    float dCurva;
+  };
+
+static const ConfigModo modoLento = {VEL_RECTA_LENTO, VEL_CURVA_LENTO, P_RECTA_LENTO, D_RECTA_LENTO, P_CURVA_LENTO, D_CURVA_LENTO};
+static const ConfigModo modoRapido = {VEL_RECTA_RAPIDO, VEL_CURVA_RAPIDO, P_RECTA_RAPIDO, D_RECTA_RAPIDO, P_CURVA_RAPIDO, D_CURVA_RAPIDO};
 
 
 void setup() {
@@ -91,8 +124,8 @@ void loop() {
   float a, b, c;
 
   int velocidadMax;
-  static int veloci, veloci2;
-  static float pRecta, dRecta, pCurva, dCurva;
+  static const ConfigModo* modoActual = nullptr;
+
 
   static int lecturaBoton1, lecturaBoton2;
   static int estadoBoton1 = 0, estadoBoton2 = 0;
@@ -102,6 +135,7 @@ void loop() {
   static int empieza = 0;
   static int ultValor;
 
+  
 
   switch (estado)
   {
@@ -176,9 +210,6 @@ void loop() {
       break;
 
     case MODO_2:
-      //****************************************
-      //            SE CAMBIA ACÁ
-      //****************************************
 
       lecturaBoton1 = digitalRead(PIN_BOTON1);
       lecturaBoton2 = digitalRead(PIN_BOTON2);
@@ -187,24 +218,14 @@ void loop() {
         estadoBoton1 = 1;
       }
       if (lecturaBoton1 == 1 && estadoBoton1 == 1) {    //MODO LENTO - CERCA DEL LED
-        veloci = 138; //VELOCIDAD RECTA  210
-        veloci2 = 188;//VELOCIDAD CURVA  170  155
-        pRecta = 0.1; //  0.15
-        dRecta = 0.1;//  2.3
-        pCurva = 0.2;//  0.2
-        dCurva = 3;//  3
+        modoActual = &modoLento;
         estado = MODO_3;
       }
       if (lecturaBoton2 == 0 && estadoBoton2 == 0) {
         estadoBoton2 = 1;
       }
       if (lecturaBoton2 == 1 && estadoBoton2 == 1) {    //MODO RAPIDO - LEJOS DEL LED
-        veloci = 200; //VELOCIDAD RECTA 235 180
-        veloci2 = 155;  //VELOCIDAD CURVA 180 235
-        pRecta = 0.1; // 0.2  0.15
-        dRecta = 0.1;// 2  0.5
-        pCurva = 0.2;//  0.38
-        dCurva = 3;// 3.3
+        modoActual = &modoRapido;
         estado = MODO_3;
       }
       break;
@@ -288,18 +309,17 @@ void loop() {
       //-----------
 
       if (proporcional > -170 && proporcional < 170) {
-        kProporcional = pRecta;
-        kDerivada = dRecta;
-        velocidadMax = veloci;
         digitalWrite(PIN_LED2, HIGH);
+          velocidadMax = modoActual->velRecta;
+        kProporcional = modoActual->pRecta;
+        kDerivada = modoActual->dRecta;
 
       }
       else {
         digitalWrite(PIN_LED2, LOW);
-        velocidadMax = veloci2;
-
-        kProporcional = pCurva;
-        kDerivada = dCurva;
+        velocidadMax = modoActual->velCurva;
+        kProporcional = modoActual->pCurva;
+        kDerivada = modoActual->dCurva;
       }
 
       a = kProporcional * proporcional;
