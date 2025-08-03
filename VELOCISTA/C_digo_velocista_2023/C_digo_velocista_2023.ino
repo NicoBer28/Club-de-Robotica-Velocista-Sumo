@@ -43,8 +43,8 @@
                         //****************************************
 
 //---------------MODO LENTO---------------
-#define VEL_RECTA_LENTO 138
-#define VEL_CURVA_LENTO 188
+#define VEL_RECTA_LENTO 80
+#define VEL_CURVA_LENTO 100
 #define P_RECTA_LENTO 0.1
 #define D_RECTA_LENTO 0.1
 #define P_CURVA_LENTO 0.2
@@ -161,13 +161,13 @@ void loop() {
         digitalWrite(MOTI_AT, LOW);
       }
       //LECTURA SENSORES
-      medicionSP[0] = leerCNY(SP_PIN1);
-      medicionSP[1] = leerCNY(SP_PIN2);
-      medicionSP[2] = leerCNY(SP_PIN3);
-      medicionSP[3] = leerCNY(SP_PIN4);
-      medicionSP[4] = leerCNY(SP_PIN5);
-      medicionSP[5] = leerCNY(SP_PIN6);
-      medicionSP[6] = leerCNY(SP_PIN7);
+      medicionSP[0] = analogRead(SP_PIN1);
+      medicionSP[1] = analogRead(SP_PIN2);
+      medicionSP[2] = analogRead(SP_PIN3);
+      medicionSP[3] = analogRead(SP_PIN4);
+      medicionSP[4] = analogRead(SP_PIN5);
+      medicionSP[5] = analogRead(SP_PIN6);
+      medicionSP[6] = analogRead(SP_PIN7);
       /* PRINT MEDICIONES SENSORES
                 if (k > 6) {
                   k = 0;
@@ -233,13 +233,13 @@ void loop() {
 
     case MODO_3:
       //LECTURA SENSORES
-      medicionSP[0] = leerCNY(SP_PIN1);
-      medicionSP[1] = leerCNY(SP_PIN2);
-      medicionSP[2] = leerCNY(SP_PIN3);
-      medicionSP[3] = leerCNY(SP_PIN4);
-      medicionSP[4] = leerCNY(SP_PIN5);
-      medicionSP[5] = leerCNY(SP_PIN6);
-      medicionSP[6] = leerCNY(SP_PIN7);
+      medicionSP[0] = analogRead(SP_PIN1);
+      medicionSP[1] = analogRead(SP_PIN2);
+      medicionSP[2] = analogRead(SP_PIN3);
+      medicionSP[3] = analogRead(SP_PIN4);
+      medicionSP[4] = analogRead(SP_PIN5);
+      medicionSP[5] = analogRead(SP_PIN6);
+      medicionSP[6] = analogRead(SP_PIN7);
 
       sens_map[0] = mapeado(min_lectura[0], max_lectura[0], medicionSP[0]);
       sens_map[1] = mapeado(min_lectura[1], max_lectura[1], medicionSP[1]);
@@ -251,7 +251,7 @@ void loop() {
 
       //LINEA BLANCA FONDO NEGRO: DEJAR LA FUNCION
       //LINEA NEGRA FONDO BLANCO: COMENTAR LA FUNCION
-      inversion();
+      //inversion();
 
       //SI SE VA DE LA PISTA, LA FUNCION DEVUELVE 1, SINO DEVUELVE 0
       seFue = seFue();
@@ -372,15 +372,6 @@ void seguirLinea(int pin1, int pin2, float _error, float velocidadMax) {
   analogWrite(pin1, abs(cambio));
   analogWrite(pin2, velocidadMax);
 }
-
-
-int leerCNY(int pin) {
-  int medicion = analogRead(pin);
-
-  return medicion;
-}
-
-
 
 void Max_Min() {
 
