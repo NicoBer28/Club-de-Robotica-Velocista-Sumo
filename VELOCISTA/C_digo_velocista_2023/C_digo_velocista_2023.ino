@@ -41,46 +41,9 @@
 
 int max_lectura[cant_sens], min_lectura[cant_sens], sens_map[cant_sens];
 int medicionSP[cant_sens];
-int i;
 
-int proporcional;
-int integral;
-int derivada;
-int p_anterior;
-float kProporcional;
-float kIntegral = 0;
-float kDerivada;
-float error;
-float a;
-float b;
-float c;
-int estado;
+int estado = MODO_0;
 
-int velocidadMax;
-
-int suma_mapeados;
-
-int lecturaBoton1, lecturaBoton2;
-int estadoBoton1;
-int estadoBoton2;
-
-
-float ms;
-float seg;
-
-int k;
-
-int empieza;
-int seFue;
-int ultValor;
-int sumador;
-
-int veloci;
-int veloci2;
-float pRecta;
-float dRecta;
-float pCurva;
-float dCurva;
 
 void setup() {
 
@@ -119,6 +82,26 @@ void setup() {
 
 }
 void loop() {
+  int seFue;
+  int proporcional, derivada;
+  static int integral = 0;
+  static int p_anterior = 0;
+  float kProporcional, kIntegral = 0, kDerivada;
+  float error;
+  float a, b, c;
+
+  int velocidadMax;
+  static int veloci, veloci2;
+  static float pRecta, dRecta, pCurva, dCurva;
+
+  static int lecturaBoton1, lecturaBoton2;
+  static int estadoBoton1 = 0, estadoBoton2 = 0;
+
+  int k;
+
+  static int empieza = 0;
+  static int ultValor;
+
 
   switch (estado)
   {
@@ -329,11 +312,11 @@ void loop() {
       if (seFue == 0) {
 
         if (error  <= 0) {
-          seguirLinea(MOTD_PWM, MOTI_PWM, error);
+          seguirLinea(MOTD_PWM, MOTI_PWM, error, velocidadMax);
           //Serial.println("If 1");
         }
         if (error > 0) { //DOBLAR A LA IZQUIERDA, IZ QUIER DA
-          seguirLinea(MOTI_PWM, MOTD_PWM, error);
+          seguirLinea(MOTI_PWM, MOTD_PWM, error, velocidadMax);
           //Serial.println("If 2");
         }
       }
@@ -342,7 +325,7 @@ void loop() {
   }
 }
 
-void seguirLinea(int pin1, int pin2, float _error) {
+void seguirLinea(int pin1, int pin2, float _error, float velocidadMax) {
   float cambio;
 
   cambio = velocidadMax - abs(_error);
@@ -380,7 +363,7 @@ int leerCNY(int pin) {
 
 void Max_Min() {
 
-  for (i = 0; i < cant_sens; i++) {
+  for (int i = 0; i < cant_sens; i++) {
 
     if (medicionSP[i] > max_lectura[i]) {
       max_lectura[i] = medicionSP[i];
@@ -409,8 +392,7 @@ int mapeado(int minimo, int maximo, int medicion) {
 }
 
 void inversion() {
-  sumador = 0;
-  for (i = 0; i < cant_sens; i++) {
+  for (int i = 0; i < cant_sens; i++) {
     sens_map[i] = 1000 - sens_map[i];
     //Serial.println(sens_map[i]);
   }
@@ -420,7 +402,7 @@ int sacaLineas() {
   long dividendo = 0;
   long suma = 0;
   int linea;
-  for (i = 0; i < cant_sens; i++) {
+  for (int i = 0; i < cant_sens; i++) {
     dividendo += sens_map[i] * (i + 1);
     suma += sens_map[i];
   }
