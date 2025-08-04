@@ -48,15 +48,15 @@
 #define P_RECTA_LENTO 0.1
 #define D_RECTA_LENTO 0.1
 #define P_CURVA_LENTO 0.2
-#define D_CURVA_LENTO 3.0
+#define D_CURVA_LENTO 1.0
 
 //---------------MODO RAPIDO---------------
 #define VEL_RECTA_RAPIDO 200
-#define VEL_CURVA_RAPIDO 155
+#define VEL_CURVA_RAPIDO 135
 #define P_RECTA_RAPIDO 0.1
 #define D_RECTA_RAPIDO 0.1
 #define P_CURVA_RAPIDO 0.2
-#define D_CURVA_RAPIDO 3.0
+#define D_CURVA_RAPIDO 1.0
 
 
 
@@ -254,7 +254,7 @@ void loop() {
       //inversion();
 
       //SI SE VA DE LA PISTA, LA FUNCION DEVUELVE 1, SINO DEVUELVE 0
-      seFue = seFue();
+      seFue = seFueFun();
 
       //POSICION DEL ROBOT RESPECTO A LA LINEA, DE -1000 A 1000
       proporcional = sacaLineas();
@@ -309,7 +309,7 @@ void loop() {
       }
       //-----------
 
-      if (proporcional > -170 && proporcional < 170) {
+      if (proporcional > -200 && proporcional < 200) {
         digitalWrite(PIN_LED2, HIGH);
           velocidadMax = modoActual->velRecta;
         kProporcional = modoActual->pRecta;
@@ -437,7 +437,7 @@ int sacaLineas() {
 }
 
 
-int seFue() {
+int seFueFun() {
   int sumador = 0;
   int afuera;
 
