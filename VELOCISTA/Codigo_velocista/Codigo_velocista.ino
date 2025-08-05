@@ -25,8 +25,6 @@
 #define MODO_2 2
 #define MODO_3 3
 
-#define TRUE 0
-#define FALSE 1
 //BOTONES
 #define PIN_BOTON1 12
 #define PIN_BOTON2 11
@@ -48,16 +46,20 @@
                         //****************************************
 
 //---------------MODO LENTO---------------//
-#define VEL_RECTA_LENTO 80
-#define VEL_CURVA_LENTO 100
+#define VEL_RECTA_MAX_LENTO 80
+#define VEL_CURVA_MAX_LENTO 100
+#define VEL_RECTA_MIN_LENTO 0
+#define VEL_CURVA_MIN_LENTO 0
 #define P_RECTA_LENTO 0.1
 #define D_RECTA_LENTO 0.1
 #define P_CURVA_LENTO 0.2
 #define D_CURVA_LENTO 1.0
 
 //---------------MODO RAPIDO---------------//
-#define VEL_RECTA_RAPIDO 200
-#define VEL_CURVA_RAPIDO 135
+#define VEL_RECTA_MAX_RAPIDO 200
+#define VEL_CURVA_MAX_RAPIDO 135
+#define VEL_RECTA_MIN_RAPIDO 0
+#define VEL_CURVA_MIN_RAPIDO 0
 #define P_RECTA_RAPIDO 0.1
 #define D_RECTA_RAPIDO 0.1
 #define P_CURVA_RAPIDO 0.2
@@ -73,7 +75,7 @@
 #define VEL_RUEDA_EXTERIOR 200 //velocidad de la rueda mas lejos de la linea, una vez que se fue
 #define VEL_RUEDA_INTERIOR 100 //velocidad de la rueda mas cerca de la linea, una vez que se fue
 #define RUEDA_INTERIOR_AD LOW //HIGH para que la rueda interior gire hacia adelante, LOW para que gire hacia atras
-#define RUEDA_INTERIOR_AT !RUEDA_INTERIOR_AD
+#define RUEDA_INTERIOR_AT !RUEDA_INTERIOR_AD //no hace falta cambiarlo, con cambiar RUEDA_INTERIOR_AD es suficiente
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -83,16 +85,18 @@ int medicionSP[CANT_SENS];
 int estado = MODO_0;
 
 struct ConfigModo {
-    int velRecta;
-    int velCurva;
+    int velRectaMax;
+    int velCurvaMax;
+    int velRectaMin;
+    int velCurvaMin;
     float pRecta;
     float dRecta;
     float pCurva;
     float dCurva;
   };
 
-static const ConfigModo modoLento = {VEL_RECTA_LENTO, VEL_CURVA_LENTO, P_RECTA_LENTO, D_RECTA_LENTO, P_CURVA_LENTO, D_CURVA_LENTO};
-static const ConfigModo modoRapido = {VEL_RECTA_RAPIDO, VEL_CURVA_RAPIDO, P_RECTA_RAPIDO, D_RECTA_RAPIDO, P_CURVA_RAPIDO, D_CURVA_RAPIDO};
+static const ConfigModo modoLento = {VEL_RECTA_MAX_LENTO, VEL_CURVA_MAX_LENTO, VEL_RECTA_MIN_LENTO, VEL_CURVA_MIN_LENTO, P_RECTA_LENTO, D_RECTA_LENTO, P_CURVA_LENTO, D_CURVA_LENTO};
+static const ConfigModo modoRapido = {VEL_RECTA_MAX_RAPIDO, VEL_CURVA_MAX_RAPIDO, VEL_RECTA_MIN_RAPIDO, VEL_CURVA_MIN_RAPIDO, P_RECTA_RAPIDO, D_RECTA_RAPIDO, P_CURVA_RAPIDO, D_CURVA_RAPIDO};
 
 
 void setup() {
@@ -140,7 +144,7 @@ void loop() {
   float error;
   float errorProporcional, errorIntegral, errorDerivada;
 
-  int velocidadMax;
+  int velocidadMax, velocidadMin;
   static const ConfigModo* modoActual = nullptr;
 
 
@@ -322,14 +326,16 @@ void loop() {
       }
       if(enRecta) {
         //digitalWrite(PIN_LED2, HIGH);
-        velocidadMax = modoActual->velRecta;
+        velocidadMax = modoActual->velRectaMax;
+        velocidadMin = modoActual->velRectaMin;
         kProporcional = modoActual->pRecta;
         kDerivada = modoActual->dRecta;
 
       }
       else {
         //digitalWrite(PIN_LED2, LOW);
-        velocidadMax = modoActual->velCurva;
+        velocidadMax = modoActual->velCurvaMax;
+        velocidadMin = modoActual->velCurvaMin;
         kProporcional = modoActual->pCurva;
         kDerivada = modoActual->dCurva;
       }
@@ -344,10 +350,10 @@ void loop() {
       if (seFue == 0) {
 
         if (error  <= 0) {
-          seguirLinea(MOTD_PWM, MOTI_PWM, error, velocidadMax);
+          seguirLinea(MOTD_PWM, MOTI_PWM, error, velocidadMax, velocidadMin);
           //Serial.println("If 1");
         } else { //DOBLAR A LA IZQUIERDA, IZ QUIER DA
-          seguirLinea(MOTI_PWM, MOTD_PWM, error, velocidadMax);
+          seguirLinea(MOTI_PWM, MOTD_PWM, error, velocidadMax, velocidadMin);
           //Serial.println("If 2");
         }
       }
@@ -356,10 +362,10 @@ void loop() {
   }
 }
 
-void seguirLinea(int pin_lento, int pin_rapido, float _error, float velocidadMax) {
-  float cambio;
+void seguirLinea(int pin_lento, int pin_rapido, float _error, int velocidadMax, int velocidadMin) {
+  int cambio;
 
-  cambio = velocidadMax - abs(_error);
+  cambio = velocidadMax - (int)abs(_error);
   /*
     if (cambio >= 0) {
       digitalWrite(mot1A, HIGH);
@@ -375,8 +381,8 @@ void seguirLinea(int pin_lento, int pin_rapido, float _error, float velocidadMax
       digitalWrite(mot2B, LOW);
     }
   */
-  if (cambio < 0) {
-    cambio = 0;
+  if (cambio < velocidadMin) {
+    cambio = velocidadMin;
   }
   //Serial.println(cambio);
   analogWrite(pin_lento, abs(cambio));
