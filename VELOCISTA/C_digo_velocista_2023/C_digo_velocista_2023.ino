@@ -38,11 +38,16 @@
 
 #define BAUD_RATE 9600
 
+#define LINEA_POS_MIN (1 * 1000)
+#define LINEA_POS_MAX (CANT_SENS * 1000)
+
+//--------------------------------------------------------------------------------------------------------------------
+
                         //****************************************
-                        //            SE CAMBIA ACÁ
+                        //************ SE CAMBIA ACÁ *************
                         //****************************************
 
-//---------------MODO LENTO---------------
+//---------------MODO LENTO---------------//
 #define VEL_RECTA_LENTO 80
 #define VEL_CURVA_LENTO 100
 #define P_RECTA_LENTO 0.1
@@ -50,7 +55,7 @@
 #define P_CURVA_LENTO 0.2
 #define D_CURVA_LENTO 1.0
 
-//---------------MODO RAPIDO---------------
+//---------------MODO RAPIDO---------------//
 #define VEL_RECTA_RAPIDO 200
 #define VEL_CURVA_RAPIDO 135
 #define P_RECTA_RAPIDO 0.1
@@ -58,7 +63,19 @@
 #define P_CURVA_RAPIDO 0.2
 #define D_CURVA_RAPIDO 1.0
 
+//---MODO RECTA/CURVA---//
+#define LIM_RECTA_CURVA 200 //limite en valor absoluto del proporcional (-1000 a 1000) para considerar recta/curva
+#define HISTERESIS_RECTA_CURVA 10 //desfasaje del proporicional para que no haya oscilamiento
 
+//---FUNCION SEFUE---//
+#define UMBRAL_SIN_LINEA 200 //umbral para determinar si se fue de la linea (va de 0 a 1000, menos de UMBRAL_SIN_LINEA se considera que se fue)
+#define CANT_SIN_LINEA (CANT_SENS - 1) //cantidad de sensores necesarios que detecten < UMBRAL_SIN_LINEA para que se considere que el robot se fue de la pista
+#define VEL_RUEDA_EXTERIOR 200 //velocidad de la rueda mas lejos de la linea, una vez que se fue
+#define VEL_RUEDA_INTERIOR 100 //velocidad de la rueda mas cerca de la linea, una vez que se fue
+#define RUEDA_INTERIOR_AD LOW //HIGH para que la rueda interior gire hacia adelante, LOW para que gire hacia atras
+#define RUEDA_INTERIOR_AT !RUEDA_INTERIOR_AD
+
+//--------------------------------------------------------------------------------------------------------------------
 
 int max_lectura[CANT_SENS], min_lectura[CANT_SENS], sens_map[CANT_SENS];
 int medicionSP[CANT_SENS];
@@ -121,7 +138,7 @@ void loop() {
   static int p_anterior = 0;
   float kProporcional, kIntegral = 0, kDerivada;
   float error;
-  float a, b, c;
+  float errorProporcional, errorIntegral, errorDerivada;
 
   int velocidadMax;
   static const ConfigModo* modoActual = nullptr;
@@ -135,7 +152,8 @@ void loop() {
   static int empieza = 0;
   static int ultValor;
 
-  
+  bool enRecta = true;
+
 
   switch (estado)
   {
@@ -155,10 +173,7 @@ void loop() {
       static boolean setup_direccion = false;
       if (setup_direccion == false) {  //tmb se puede escribir como !setup_direccion
         setup_direccion = true;
-        digitalWrite(MOTD_AD, HIGH);
-        digitalWrite(MOTI_AD, HIGH);
-        digitalWrite(MOTD_AT, LOW);
-        digitalWrite(MOTI_AT, LOW);
+        setMotores(HIGH, HIGH, LOW, LOW); //MOTD_AD - MOTI_AD - MOTD_AT - MOTI_AT
       }
       //LECTURA SENSORES
       medicionSP[0] = analogRead(SP_PIN1);
@@ -257,8 +272,9 @@ void loop() {
       seFue = seFueFun();
 
       //POSICION DEL ROBOT RESPECTO A LA LINEA, DE -1000 A 1000
-      proporcional = sacaLineas();
-      Serial.println(proporcional);
+      proporcional = posicionRobot();
+      //Serial.println(proporcional);
+
       //------
       //PID
       integral = integral + proporcional;
@@ -268,7 +284,7 @@ void loop() {
       } // corrige el overshooting - integral windup
 
       derivada = proporcional - p_anterior;
-      p_anterior = proporcional;
+      p_anterior = proporcional; 
       //------
 
       //-----------
@@ -278,55 +294,50 @@ void loop() {
 
         if (ultValor == 0) {
           //Serial.println("izq");
-          digitalWrite(MOTD_AD, HIGH);
-          digitalWrite(MOTI_AD, LOW);
-          digitalWrite(MOTD_AT, LOW);
-          digitalWrite(MOTI_AT, HIGH);
-          analogWrite(MOTI_PWM, 150);// 100
-          analogWrite(MOTD_PWM, 150);//255  // 200
+          setMotores(HIGH, RUEDA_INTERIOR_AD, LOW, RUEDA_INTERIOR_AT); //MOTD_AD - MOTI_AD - MOTD_AT - MOTI_AT
+
+          analogWrite(MOTI_PWM, VEL_RUEDA_INTERIOR);
+          analogWrite(MOTD_PWM, VEL_RUEDA_EXTERIOR);
         }
         if (ultValor == 1) {
           //Serial.println("der");
-          digitalWrite(MOTD_AD, LOW);
-          digitalWrite(MOTI_AD, HIGH);
-          digitalWrite(MOTD_AT, HIGH);
-          digitalWrite(MOTI_AT, LOW);
-          analogWrite(MOTD_PWM, 150); // 100
-          analogWrite(MOTI_PWM, 150);//255  // 200
+          setMotores(RUEDA_INTERIOR_AD, HIGH, RUEDA_INTERIOR_AT, LOW); //MOTD_AD - MOTI_AD - MOTD_AT - MOTI_AT
+          analogWrite(MOTD_PWM, VEL_RUEDA_INTERIOR);
+          analogWrite(MOTI_PWM, VEL_RUEDA_EXTERIOR);
         }
-      } else if (proporcional < 0) {
-        ultValor = 1;
-        digitalWrite(MOTD_AD, HIGH);
-        digitalWrite(MOTI_AD, HIGH);
-        digitalWrite(MOTD_AT, LOW);
-        digitalWrite(MOTI_AT, LOW);
       } else {
-        ultValor = 0;
-        digitalWrite(MOTD_AD, HIGH);
-        digitalWrite(MOTI_AD, HIGH);
-        digitalWrite(MOTD_AT, LOW);
-        digitalWrite(MOTI_AT, LOW);
+        if (proporcional < 0) {
+          ultValor = 1;
+        }else{
+          ultValor = 0;
+        }
+        setMotores(HIGH, HIGH, LOW, LOW); //MOTD_AD - MOTI_AD - MOTD_AT - MOTI_AT
       }
       //-----------
 
-      if (proporcional > -200 && proporcional < 200) {
-        digitalWrite(PIN_LED2, HIGH);
-          velocidadMax = modoActual->velRecta;
+      if(enRecta && abs(proporcional) > LIM_RECTA_CURVA + HISTERESIS_RECTA_CURVA){
+        enRecta = false;
+      }else if(!enRecta && abs(proporcional) < LIM_RECTA_CURVA - HISTERESIS_RECTA_CURVA)){
+        enRecta = true;
+      }
+      if(enRecta) {
+        //digitalWrite(PIN_LED2, HIGH);
+        velocidadMax = modoActual->velRecta;
         kProporcional = modoActual->pRecta;
         kDerivada = modoActual->dRecta;
 
       }
       else {
-        digitalWrite(PIN_LED2, LOW);
+        //digitalWrite(PIN_LED2, LOW);
         velocidadMax = modoActual->velCurva;
         kProporcional = modoActual->pCurva;
         kDerivada = modoActual->dCurva;
       }
 
-      a = kProporcional * proporcional;
-      b = kIntegral * integral;
-      c = kDerivada * derivada;
-      error = a + b + c;
+      errorProporcional = kProporcional * proporcional;
+      errorIntegral = kIntegral * integral;
+      errorDerivada = kDerivada * derivada;
+      error = errorProporcional + errorIntegral + errorDerivada;
       //error = (kProporcional * proporcional) + (kIntegral * integral) + (kDerivada * derivada);
 
       //error = ((kProporcional * proporcional) + (kDerivada * derivada));
@@ -335,8 +346,7 @@ void loop() {
         if (error  <= 0) {
           seguirLinea(MOTD_PWM, MOTI_PWM, error, velocidadMax);
           //Serial.println("If 1");
-        }
-        if (error > 0) { //DOBLAR A LA IZQUIERDA, IZ QUIER DA
+        } else { //DOBLAR A LA IZQUIERDA, IZ QUIER DA
           seguirLinea(MOTI_PWM, MOTD_PWM, error, velocidadMax);
           //Serial.println("If 2");
         }
@@ -346,7 +356,7 @@ void loop() {
   }
 }
 
-void seguirLinea(int pin1, int pin2, float _error, float velocidadMax) {
+void seguirLinea(int pin_lento, int pin_rapido, float _error, float velocidadMax) {
   float cambio;
 
   cambio = velocidadMax - abs(_error);
@@ -369,8 +379,8 @@ void seguirLinea(int pin1, int pin2, float _error, float velocidadMax) {
     cambio = 0;
   }
   //Serial.println(cambio);
-  analogWrite(pin1, abs(cambio));
-  analogWrite(pin2, velocidadMax);
+  analogWrite(pin_lento, abs(cambio));
+  analogWrite(pin_rapido, velocidadMax);
 }
 
 void Max_Min() {
@@ -410,27 +420,27 @@ void inversion() {
   }
 }
 
-int sacaLineas() {
+int posicionRobot() {
   long dividendo = 0;
   long suma = 0;
-  int linea;
+  int linea = 0;
   for (int i = 0; i < CANT_SENS; i++) {
     dividendo += sens_map[i] * (i + 1);
     suma += sens_map[i];
   }
   if (suma > 0) {
-    linea = (dividendo * 1000) / suma;
+    linea = (dividendo * LINEA_POS_MIN) / suma;
   }
 
-  if (linea < 1000) {
-    linea = 1000;
+  if (linea < LINEA_POS_MIN) {
+    linea = LINEA_POS_MIN;
   }
 
-  if (linea > 7000) {
-    linea = 7000;
+  if (linea > LINEA_POS_MAX) {
+    linea = LINEA_POS_MAX;
   }
 
-  linea = map(linea, 1000, 7000, -1000, 1000);
+  linea = map(linea, LINEA_POS_MIN, LINEA_POS_MAX, -1000, 1000);
   //Serial.println(linea);
 
   return linea;
@@ -438,26 +448,25 @@ int sacaLineas() {
 
 
 int seFueFun() {
-  int sumador = 0;
-  int afuera;
+  int cantSensoresFuera = 0;
 
-  for (int l = 0; l < CANT_SENS; l++) {
+  for (int i = 0; i < CANT_SENS; i++) {
     /*    Serial.print(l);
         Serial.print(": ");
         Serial.println(sens_map[l]);
     */
-    if (sens_map[l] < 200) {
-      sumador += 1;
+    if (sens_map[i] < UMBRAL_SIN_LINEA) {
+      cantSensoresFuera++;
     }
   }
-  //Serial.println(sumador);
+  //Serial.println(cantSensoresFuera);
 
-  if (sumador >= 6) {
-    afuera = 1;
-    sumador = 0;
-  } else {
-    afuera = 0;
-  }
-  return afuera;
+  return (cantSensoresFuera >= CANT_SIN_LINEA);
+}
 
+void setMotores(bool motd_ad, bool moti_ad, bool motd_at, bool moti_at) {
+  digitalWrite(MOTD_AD, motd_ad);
+  digitalWrite(MOTI_AD, moti_ad);
+  digitalWrite(MOTD_AT, motd_at);
+  digitalWrite(MOTI_AT, moti_at);
 }
