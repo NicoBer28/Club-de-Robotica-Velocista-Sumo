@@ -46,36 +46,38 @@
                         //****************************************
 
 //---------------MODO LENTO-------------//
-#define VEL_RECTA_MAX_LENTO 80          //velocidad maxima en recta para el modo lento
+#define VEL_RECTA_MAX_LENTO 150          //velocidad maxima en recta para el modo lento
 #define VEL_CURVA_MAX_LENTO 100         //velocidad maxima en curva para el modo lento
 #define VEL_RECTA_MIN_LENTO 0           //velocidad minima en recta para el modo lento
 #define VEL_CURVA_MIN_LENTO 0           //velocidad minima en curva para el modo lento
-#define P_RECTA_LENTO 0.1               //constante de proporcional en recta para el modo lento
-#define D_RECTA_LENTO 0.1               //constante de derivada en recta para el modo lento
-#define P_CURVA_LENTO 0.2               //constante de proporcional en curva para el modo lento
-#define D_CURVA_LENTO 1.0               //constante de derivada en curva para el modo lento
+#define P_RECTA_LENTO 0.02               //constante de proporcional en recta para el modo lento
+#define D_RECTA_LENTO 0.02               //constante de derivada en recta para el modo lento
+#define I_RECTA_LENTO 0                 //constante de integral en recta para el modo lento
+#define P_CURVA_LENTO 0.1               //constante de proporcional en curva para el modo lento
+#define D_CURVA_LENTO 0.1        //constante de derivada en curva para el modo lento
+#define I_CURVA_LENTO 0                 //constante de integral en curva para el modo lento
 
 //---------------MODO RAPIDO------------//
 #define VEL_RECTA_MAX_RAPIDO 200        //velocidad maxima en recta para el modo rapido
 #define VEL_CURVA_MAX_RAPIDO 135        //velocidad maxima en curva para el modo rapido
 #define VEL_RECTA_MIN_RAPIDO 0          //velocidad minima en recta para el modo rapido
 #define VEL_CURVA_MIN_RAPIDO 0          //velocidad minima en curva para el modo rapido
-#define P_RECTA_RAPIDO 0.1              //constante de proporcional en recta para el modo rapido
-#define D_RECTA_RAPIDO 0.1              //constante de derivada en recta para el modo rapido
+#define P_RECTA_RAPIDO 0.02             //constante de proporcional en recta para el modo rapido
+#define D_RECTA_RAPIDO 0.02              //constante de derivada en recta para el modo rapido
 #define I_RECTA_RAPIDO 0                //constante de integral en recta para el modo rapido
-#define P_CURVA_RAPIDO 0.2              //constante de proporcional en curva para el modo rapido
-#define D_CURVA_RAPIDO 1.0              //constante de derivada en curva para el modo rapido
+#define P_CURVA_RAPIDO 0.1              //constante de proporcional en curva para el modo rapido
+#define D_CURVA_RAPIDO 0.1              //constante de derivada en curva para el modo rapido
 #define I_CURVA_RAPIDO 0                //constante de integral en curva para el modo rapido
 
 //---MODO RECTA/CURVA---//
-#define LIM_RECTA_CURVA 200             //limite en valor absoluto del proporcional (-1000 a 1000) para considerar recta/curva
+#define LIM_RECTA_CURVA 250             //limite en valor absoluto del proporcional (-1000 a 1000) para considerar recta/curva
 #define HISTERESIS_RECTA_CURVA 10       //desfasaje del proporicional para que no haya oscilamiento
 
 //---FUNCION SEFUE---//
 #define UMBRAL_SIN_LINEA 200            //umbral para determinar si se fue de la linea (va de 0 a 1000, menos de UMBRAL_SIN_LINEA se considera que se fue)
-#define CANT_SIN_LINEA (CANT_SENS - 1)  //cantidad de sensores necesarios que detecten < UMBRAL_SIN_LINEA para que se considere que el robot se fue de la pista
-#define VEL_RUEDA_EXTERIOR 200          //velocidad de la rueda mas lejos de la linea, una vez que se fue
-#define VEL_RUEDA_INTERIOR 100          //velocidad de la rueda mas cerca de la linea, una vez que se fue
+#define CANT_SIN_LINEA (CANT_SENS - 0) //cantidad de sensores necesarios que detecten < UMBRAL_SIN_LINEA para que se considere que el robot se fue de la pista
+#define VEL_RUEDA_EXTERIOR 140          //velocidad de la rueda mas lejos de la linea, una vez que se fue
+#define VEL_RUEDA_INTERIOR 40          //velocidad de la rueda mas cerca de la linea, una vez que se fue
 #define RUEDA_INTERIOR_AD LOW           //HIGH para que la rueda interior gire hacia adelante, LOW para que gire hacia atras
 
 #define RUEDA_INTERIOR_AT !RUEDA_INTERIOR_AD //no hace falta cambiarlo, con cambiar RUEDA_INTERIOR_AD es suficiente
@@ -97,7 +99,7 @@ struct ConfigModo {
     float iRecta;
     float pCurva;
     float dCurva;
-    float iCurva
+    float iCurva;
   };
 
 static const ConfigModo modoLento = {VEL_RECTA_MAX_LENTO, VEL_CURVA_MAX_LENTO, VEL_RECTA_MIN_LENTO, VEL_CURVA_MIN_LENTO, P_RECTA_LENTO, D_RECTA_LENTO, I_RECTA_LENTO, P_CURVA_LENTO, D_CURVA_LENTO, I_CURVA_LENTO};
@@ -326,7 +328,7 @@ void loop() {
 
       if(enRecta && abs(proporcional) > LIM_RECTA_CURVA + HISTERESIS_RECTA_CURVA){
         enRecta = false;
-      }else if(!enRecta && abs(proporcional) < LIM_RECTA_CURVA - HISTERESIS_RECTA_CURVA)){
+      }else if(!enRecta && abs(proporcional) < LIM_RECTA_CURVA - HISTERESIS_RECTA_CURVA){
         enRecta = true;
       }
       if(enRecta) {
